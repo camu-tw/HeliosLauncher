@@ -127,6 +127,9 @@ updateReleaseNotes = "Notes de version de la mise à jour"
 waitingText = "En attente de Microsoft.."
 
 [ejs.welcome]
+welcomeHeader = "BONJOUR"
+welcomeDescription = "Bienvenue sur le launcher Esme, un projet collaboratif du BDJ de l'Esme par Clément Rapin."
+welcomeDescCTA = "Prêt à commencer l'aventure ?"
 continueButton = "CONTINUER"
 
 
