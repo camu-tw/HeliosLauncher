@@ -1,7 +1,7 @@
 {
-  "name": "Esme Launcher",
+  "name": "esme-launcher",
   "version": "2.2.1",
-  "productName": "Esme Luncher",
+  "productName": "Esme Launcher",
   "description": "Modded Minecraft Launcher",
   "author": "Daniel Scalzi (https://github.com/dscalzi/) and C.Rapin",
   "license": "UNLICENSED",
