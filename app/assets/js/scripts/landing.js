@@ -968,14 +968,19 @@ async function loadNews(){
         
         const newsFeed = distroData.rawDistribution.rss
         const newsHost = new URL(newsFeed).origin + '/'
+        loggerLanding.info('Loading news feed from:', newsFeed)
         $.ajax({
             url: newsFeed,
             success: (data) => {
+                loggerLanding.info('News feed loaded successfully')
                 // Support both RSS (item) and Atom (entry) formats
                 let items = $(data).find('item')
                 const isAtom = items.length === 0
                 if(isAtom) {
                     items = $(data).find('entry')
+                    loggerLanding.info('Detected Atom feed format, found', items.length, 'entries')
+                } else {
+                    loggerLanding.info('Detected RSS feed format, found', items.length, 'items')
                 }
                 
                 const articles = []
