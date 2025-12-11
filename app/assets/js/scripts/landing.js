@@ -971,31 +971,58 @@ async function loadNews(){
         $.ajax({
             url: newsFeed,
             success: (data) => {
-                const items = $(data).find('item')
+                // Support both RSS (item) and Atom (entry) formats
+                let items = $(data).find('item')
+                const isAtom = items.length === 0
+                if(isAtom) {
+                    items = $(data).find('entry')
+                }
+                
                 const articles = []
 
                 for(let i=0; i<items.length; i++){
                 // JQuery Element
                     const el = $(items[i])
 
-                    // Resolve date.
-                    const date = new Date(el.find('pubDate').text()).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric'})
+                    // Resolve date - support both RSS (pubDate) and Atom (published/updated)
+                    let dateText = el.find('pubDate').text()
+                    if(!dateText) {
+                        dateText = el.find('published').text() || el.find('updated').text()
+                    }
+                    const date = new Date(dateText).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric'})
 
-                    // Resolve comments.
-                    let comments = el.find('slash\\:comments').text() || '0'
+                    // Resolve comments - support both slash:comments and thr:total
+                    let comments = el.find('slash\\:comments').text() || el.find('thr\\:total').text() || '0'
                     comments = comments + ' Comment' + (comments === '1' ? '' : 's')
 
-                    // Fix relative links in content.
+                    // Fix relative links in content - support both content:encoded and content
                     let content = el.find('content\\:encoded').text()
+                    if(!content) {
+                        content = el.find('content').text()
+                    }
                     let regex = /src="(?!http:\/\/|https:\/\/)(.+?)"/g
                     let matches
                     while((matches = regex.exec(content))){
                         content = content.replace(`"${matches[1]}"`, `"${newsHost + matches[1]}"`)
                     }
 
-                    let link   = el.find('link').text()
-                    let title  = el.find('title').text()
+                    // Resolve link - support both RSS and Atom formats
+                    let link = el.find('link').text()
+                    if(!link || isAtom) {
+                        // For Atom, find link with rel="alternate"
+                        const linkEl = el.find('link[rel="alternate"]')
+                        if(linkEl.length > 0) {
+                            link = linkEl.attr('href')
+                        }
+                    }
+                    
+                    let title = el.find('title').text()
+                    
+                    // Resolve author - support both dc:creator and author/name
                     let author = el.find('dc\\:creator').text()
+                    if(!author) {
+                        author = el.find('author name').first().text() || 'Unknown'
+                    }
 
                     // Generate article.
                     articles.push(
